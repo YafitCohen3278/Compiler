@@ -1,8 +1,9 @@
+// bootstrap
 @256
 D=A
 @SP
 M=D
-@Sys.init$ret.1
+@Sys.init.ReturnAddress0
 D=A
 @SP
 A=M
@@ -39,6 +40,8 @@ M=D
 M=M+1
 @SP
 D=M
+@0
+D=D-A
 @5
 D=D-A
 @ARG
@@ -49,38 +52,58 @@ D=M
 M=D
 @Sys.init
 0;JMP
-(Sys.init$ret.1)
+(Sys.init.ReturnAddress0)
+// ===== Class1.vm =====
+// function Class1.set 0
 (Class1.set)
 @0
 D=A
+@Class1.set.End
+D;JEQ
+(Class1.set.Loop)
+@SP
+A=M
+M=0
+@SP
+M=M+1
+@Class1.set.Loop
+D=D-1;JNE
+(Class1.set.End)
+// push argument 0
+@0
+D=A
 @ARG
-A=M+D
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
+// pop static 0
 @SP
 AM=M-1
 D=M
 @Class1.0
 M=D
+// push argument 1
 @1
 D=A
 @ARG
-A=M+D
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
+// pop static 1
 @SP
 AM=M-1
 D=M
 @Class1.1
 M=D
+// push constant 0
 @0
 D=A
 @SP
@@ -88,6 +111,7 @@ A=M
 M=D
 @SP
 M=M+1
+// return rn rn
 @LCL
 D=M
 @R13
@@ -130,7 +154,22 @@ M=D
 @R14
 A=M
 0;JMP
+// function Class1.get 0
 (Class1.get)
+@0
+D=A
+@Class1.get.End
+D;JEQ
+(Class1.get.Loop)
+@SP
+A=M
+M=0
+@SP
+M=M+1
+@Class1.get.Loop
+D=D-1;JNE
+(Class1.get.End)
+// push static 0
 @Class1.0
 D=M
 @SP
@@ -138,6 +177,7 @@ A=M
 M=D
 @SP
 M=M+1
+// push static 1
 @Class1.1
 D=M
 @SP
@@ -145,11 +185,13 @@ A=M
 M=D
 @SP
 M=M+1
+// sub ub ub
 @SP
 AM=M-1
 D=M
 A=A-1
 M=M-D
+// return rn rn
 @LCL
 D=M
 @R13
@@ -192,37 +234,57 @@ M=D
 @R14
 A=M
 0;JMP
+// ===== Class2.vm =====
+// function Class2.set 0
 (Class2.set)
 @0
 D=A
+@Class2.set.End
+D;JEQ
+(Class2.set.Loop)
+@SP
+A=M
+M=0
+@SP
+M=M+1
+@Class2.set.Loop
+D=D-1;JNE
+(Class2.set.End)
+// push argument 0
+@0
+D=A
 @ARG
-A=M+D
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
+// pop static 0
 @SP
 AM=M-1
 D=M
 @Class2.0
 M=D
+// push argument 1
 @1
 D=A
 @ARG
-A=M+D
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
+// pop static 1
 @SP
 AM=M-1
 D=M
 @Class2.1
 M=D
+// push constant 0
 @0
 D=A
 @SP
@@ -230,6 +292,7 @@ A=M
 M=D
 @SP
 M=M+1
+// return rn rn
 @LCL
 D=M
 @R13
@@ -272,7 +335,22 @@ M=D
 @R14
 A=M
 0;JMP
+// function Class2.get 0
 (Class2.get)
+@0
+D=A
+@Class2.get.End
+D;JEQ
+(Class2.get.Loop)
+@SP
+A=M
+M=0
+@SP
+M=M+1
+@Class2.get.Loop
+D=D-1;JNE
+(Class2.get.End)
+// push static 0
 @Class2.0
 D=M
 @SP
@@ -280,6 +358,7 @@ A=M
 M=D
 @SP
 M=M+1
+// push static 1
 @Class2.1
 D=M
 @SP
@@ -287,11 +366,13 @@ A=M
 M=D
 @SP
 M=M+1
+// sub ub ub
 @SP
 AM=M-1
 D=M
 A=A-1
 M=M-D
+// return rn rn
 @LCL
 D=M
 @R13
@@ -334,7 +415,23 @@ M=D
 @R14
 A=M
 0;JMP
+// ===== Sys.vm =====
+// function Sys.init 0
 (Sys.init)
+@0
+D=A
+@Sys.init.End
+D;JEQ
+(Sys.init.Loop)
+@SP
+A=M
+M=0
+@SP
+M=M+1
+@Sys.init.Loop
+D=D-1;JNE
+(Sys.init.End)
+// push constant 6
 @6
 D=A
 @SP
@@ -342,6 +439,7 @@ A=M
 M=D
 @SP
 M=M+1
+// push constant 8
 @8
 D=A
 @SP
@@ -349,7 +447,8 @@ A=M
 M=D
 @SP
 M=M+1
-@Class1.set$ret.2
+// call Class1.set 2
+@Class1.set.ReturnAddress1
 D=A
 @SP
 A=M
@@ -386,7 +485,9 @@ M=D
 M=M+1
 @SP
 D=M
-@7
+@2
+D=D-A
+@5
 D=D-A
 @ARG
 M=D
@@ -396,12 +497,21 @@ D=M
 M=D
 @Class1.set
 0;JMP
-(Class1.set$ret.2)
+(Class1.set.ReturnAddress1)
+// pop temp 0
+@0
+D=A
+@5
+D=D+A
+@R13
+M=D
 @SP
 AM=M-1
 D=M
-@5
+@R13
+A=M
 M=D
+// push constant 23
 @23
 D=A
 @SP
@@ -409,6 +519,7 @@ A=M
 M=D
 @SP
 M=M+1
+// push constant 15
 @15
 D=A
 @SP
@@ -416,7 +527,8 @@ A=M
 M=D
 @SP
 M=M+1
-@Class2.set$ret.3
+// call Class2.set 2
+@Class2.set.ReturnAddress2
 D=A
 @SP
 A=M
@@ -453,7 +565,9 @@ M=D
 M=M+1
 @SP
 D=M
-@7
+@2
+D=D-A
+@5
 D=D-A
 @ARG
 M=D
@@ -463,13 +577,22 @@ D=M
 M=D
 @Class2.set
 0;JMP
-(Class2.set$ret.3)
+(Class2.set.ReturnAddress2)
+// pop temp 0
+@0
+D=A
+@5
+D=D+A
+@R13
+M=D
 @SP
 AM=M-1
 D=M
-@5
+@R13
+A=M
 M=D
-@Class1.get$ret.4
+// call Class1.get 0
+@Class1.get.ReturnAddress3
 D=A
 @SP
 A=M
@@ -506,6 +629,8 @@ M=D
 M=M+1
 @SP
 D=M
+@0
+D=D-A
 @5
 D=D-A
 @ARG
@@ -516,8 +641,9 @@ D=M
 M=D
 @Class1.get
 0;JMP
-(Class1.get$ret.4)
-@Class2.get$ret.5
+(Class1.get.ReturnAddress3)
+// call Class2.get 0
+@Class2.get.ReturnAddress4
 D=A
 @SP
 A=M
@@ -554,6 +680,8 @@ M=D
 M=M+1
 @SP
 D=M
+@0
+D=D-A
 @5
 D=D-A
 @ARG
@@ -564,7 +692,9 @@ D=M
 M=D
 @Class2.get
 0;JMP
-(Class2.get$ret.5)
-(Sys.END)
-@Sys.END
+(Class2.get.ReturnAddress4)
+// label END ND
+(Sys.init$END)
+// goto END ND
+@Sys.init$END
 0;JMP
