@@ -1,76 +1,86 @@
+// ===== SimpleFunction.vm =====
+// function SimpleFunction.test 2
 (SimpleFunction.test)
-@0
+@2
 D=A
+@SimpleFunction.test.End
+D;JEQ
+(SimpleFunction.test.Loop)
 @SP
 A=M
-M=D
+M=0
 @SP
 M=M+1
-@0
-D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
+@SimpleFunction.test.Loop
+D=D-1;JNE
+(SimpleFunction.test.End)
+// push local 0
 @0
 D=A
 @LCL
-A=M+D
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
+// push local 1
 @1
 D=A
 @LCL
-A=M+D
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
+// add dd dd
 @SP
 AM=M-1
 D=M
 A=A-1
 M=M+D
+// not ot ot
 @SP
 A=M-1
 M=!M
+// push argument 0
 @0
 D=A
 @ARG
-A=M+D
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
+// add dd dd
 @SP
 AM=M-1
 D=M
 A=A-1
 M=M+D
+// push argument 1
 @1
 D=A
 @ARG
-A=M+D
+A=D+M
 D=M
 @SP
 A=M
 M=D
 @SP
 M=M+1
+// sub ub ub
 @SP
 AM=M-1
 D=M
 A=A-1
 M=M-D
+// return rn rn
 @LCL
 D=M
 @R13

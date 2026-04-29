@@ -72,8 +72,8 @@ func dispatch(w1, w2, w3)
     if (w1 == "eq" || w1 == "gt" || w1 == "lt") {
         logicCounter++;
 
-        labelTrue = "TRUE_" + swrite(format="%d", logicCounter);
-        labelEnd  = "END_"  + swrite(format="%d", logicCounter);
+      labelTrue = currentFunction + "$TRUE_" + swrite(format="%d", logicCounter);
+      labelEnd  = currentFunction + "$END_"  + swrite(format="%d", logicCounter);
 
         writeLine("@SP");
         writeLine("AM=M-1");
@@ -180,24 +180,19 @@ func dispatch(w1, w2, w3)
     }
 
     if (w1 == "push" && w2 == "temp") {
-        // Use R13 approach matching reference output
-        addr = swrite(format="%d", 5 + vmParseInt(w3));
-        writeLine("@" + w3);
-        writeLine("D=A");
-        writeLine("@5");
-        writeLine("D=D+A");
-        writeLine("@R13");
-        writeLine("M=D");
+      writeLine("@" + w3);
+      writeLine("D=A");
+      writeLine("@5");
+      writeLine("A=D+A");  
+      writeLine("D=M");    
 
-        writeLine("@SP");
-        writeLine("AM=M-1");
-        writeLine("D=M");
-
-        writeLine("@R13");
-        writeLine("A=M");
-        writeLine("M=D");
-        return;
-    }
+      writeLine("@SP");
+      writeLine("A=M");
+      writeLine("M=D");
+      writeLine("@SP");
+      writeLine("M=M+1");  
+    return;
+     }
 
     if (w1 == "pop" && w2 == "temp") {
         // pop temp i  =>  addr = 5+i, store via R13
@@ -268,33 +263,29 @@ func dispatch(w1, w2, w3)
         return;
     }
 
-    if (w1 == "function") {
-        fname = w2;
-        k = vmParseInt(w3);
+   if (w1 == "function") {
+    fname = w2;
+    k = vmParseInt(w3);
+    currentFunction = fname;
 
-        // Update current function name for label/goto scope
-        currentFunction = fname;
+    writeLine("(" + fname + ")");
 
-        writeLine("(" + fname + ")");
-
-        // Emit loop-based local variable initialisation
-        // matching reference: Func.End / Func.Loop pattern
-        kStr = swrite(format="%d", k);
-        writeLine("@" + kStr);
-        writeLine("D=A");
-        writeLine("@" + fname + ".End");
-        writeLine("D;JEQ");
-        writeLine("(" + fname + ".Loop)");
-        writeLine("@SP");
-        writeLine("A=M");
-        writeLine("M=0");
-        writeLine("@SP");
-        writeLine("M=M+1");
-        writeLine("@" + fname + ".Loop");
-        writeLine("D=D-1;JNE");
-        writeLine("(" + fname + ".End)");
-        return;
-    }
+    kStr = swrite(format="%d", k);
+    writeLine("@" + kStr);
+    writeLine("D=A");
+    writeLine("@" + fname + ".End");
+    writeLine("D;JEQ");
+    writeLine("(" + fname + ".Loop)");
+    writeLine("@SP");
+    writeLine("A=M");
+    writeLine("M=0");
+    writeLine("@SP");
+    writeLine("M=M+1");
+    writeLine("@" + fname + ".Loop");  
+    writeLine("D=D-1;JNE");
+    writeLine("(" + fname + ".End)");
+    return;
+}
 
     if (w1 == "label") {
         // label is scoped to current function: FuncName$labelName
@@ -328,7 +319,7 @@ func dispatch(w1, w2, w3)
         nStr = swrite(format="%d", n);
 
         // Return address label: FuncName.ReturnAddressN  (N starts at 0)
-        ret = fname + ".ReturnAddress" + swrite(format="%d", callCounter);
+       ret = currentFunction + "$ret." + swrite(format="%d", callCounter);
         callCounter++;
 
         // push return address
@@ -385,61 +376,70 @@ func dispatch(w1, w2, w3)
         return;
     }
 
-    if (w1 == "return") {
+   if (w1 == "return") {
 
-        writeLine("@LCL");
-        writeLine("D=M");
-        writeLine("@R13");
-        writeLine("M=D");
+    // FRAME = LCL
+    writeLine("@LCL");
+    writeLine("D=M");
+    writeLine("@R13");
+    writeLine("M=D");
 
-        writeLine("@5");
-        writeLine("A=D-A");
-        writeLine("D=M");
-        writeLine("@R14");
-        writeLine("M=D");
+    // RET = *(FRAME-5)
+    writeLine("@5");
+    writeLine("A=D-A");
+    writeLine("D=M");
+    writeLine("@R14");
+    writeLine("M=D");
 
-        writeLine("@SP");
-        writeLine("AM=M-1");
-        writeLine("D=M");
-        writeLine("@ARG");
-        writeLine("A=M");
-        writeLine("M=D");
+    // *ARG = pop()
+    writeLine("@SP");
+    writeLine("AM=M-1");
+    writeLine("D=M");
+    writeLine("@ARG");
+    writeLine("A=M");
+    writeLine("M=D");
 
-        writeLine("@ARG");
-        writeLine("D=M+1");
-        writeLine("@SP");
-        writeLine("M=D");
+    // SP = ARG + 1
+    writeLine("@ARG");
+    writeLine("D=M+1");
+    writeLine("@SP");
+    writeLine("M=D");
 
-        writeLine("@R13");
-        writeLine("AM=M-1");
-        writeLine("D=M");
-        writeLine("@THAT");
-        writeLine("M=D");
+    // THAT = *(FRAME-1)
+    writeLine("@R13");
+    writeLine("AM=M-1");
+    writeLine("D=M");
+    writeLine("@THAT");
+    writeLine("M=D");
 
-        writeLine("@R13");
-        writeLine("AM=M-1");
-        writeLine("D=M");
-        writeLine("@THIS");
-        writeLine("M=D");
+    // THIS = *(FRAME-2)
+    writeLine("@R13");
+    writeLine("AM=M-1");
+    writeLine("D=M");
+    writeLine("@THIS");
+    writeLine("M=D");
 
-        writeLine("@R13");
-        writeLine("AM=M-1");
-        writeLine("D=M");
-        writeLine("@ARG");
-        writeLine("M=D");
+    // ARG = *(FRAME-3)
+    writeLine("@R13");
+    writeLine("AM=M-1");
+    writeLine("D=M");
+    writeLine("@ARG");
+    writeLine("M=D");
 
-        writeLine("@R13");
-        writeLine("AM=M-1");
-        writeLine("D=M");
-        writeLine("@LCL");
-        writeLine("M=D");
+    // LCL = *(FRAME-4)
+    writeLine("@R13");
+    writeLine("AM=M-1");
+    writeLine("D=M");
+    writeLine("@LCL");
+    writeLine("M=D");
 
-        writeLine("@R14");
-        writeLine("A=M");
-        writeLine("0;JMP");
+    // goto RET
+    writeLine("@R14");
+    writeLine("A=M");
+    writeLine("0;JMP");
 
-        return;
-    }
+    return;
+}
 }
 
 
@@ -518,13 +518,12 @@ func processVMFile(filepath)
     write, format="End of input file: %s.vm\n", currentVM;
 }
 
-//  main()
 func main(void)
 {
     extern outFile;
     logicCounter    = 0;
-    callCounter     = 0;   // starts at 0 to match reference output
-    currentFunction = "";
+    callCounter     = 0;
+    currentFunction = "Sys.init";
 
     argv  = get_argv();
     nargs = numberof(argv);
@@ -535,7 +534,7 @@ func main(void)
     }
     dirPath = argv(2);
 
-    // --- Normalise path ---
+    // --- Normalize path ---
     dlen = strlen(dirPath);
     lastChar = strpart(dirPath, dlen:dlen);
     if (lastChar == "/" || lastChar == "\\") {
@@ -562,20 +561,29 @@ func main(void)
     asmName = folderName + ".asm";
     asmPath = dirPath + "/" + asmName;
 
-    // --- Scan directory for all .vm files ---
+    // --- Scan directory ---
     allFiles = lsdir(dirPath);
-    vmFiles  = array(string, numberof(allFiles));
-    nvm = 0;
+    sysPath = "";
+    otherFiles = array(string, numberof(allFiles));
+    nothers = 0;
+    hasSys = 0;
+
     for (f = 1; f <= numberof(allFiles); f++) {
         fname = allFiles(f);
         flen  = strlen(fname);
         if (flen > 3 && strpart(fname, flen-2:flen) == ".vm") {
-            nvm++;
-            vmFiles(nvm) = dirPath + "/" + fname;
+            fullPath = dirPath + "/" + fname;
+            if (fname == "Sys.vm") {
+                sysPath = fullPath;
+                hasSys = 1;
+            } else {
+                nothers++;
+                otherFiles(nothers) = fullPath;
+            }
         }
     }
 
-    if (nvm == 0) {
+    if (hasSys == 0 && nothers == 0) {
         write, format="No .vm files found in %s\n", dirPath;
         return;
     }
@@ -584,29 +592,28 @@ func main(void)
     remove, asmPath;
     outFile = open(asmPath, "w");
 
-    // =========================
-    // BOOTSTRAP
-    // =========================
-    if (nvm > 1) {
+    // --- BOOTSTRAP ---
+    if (hasSys) {
+        currentFunction = "Sys.init";
         writeLine("// bootstrap");
-
-        // SP = 256
         writeLine("@256");
         writeLine("D=A");
         writeLine("@SP");
         writeLine("M=D");
-
-        // call Sys.init 0
         dispatch, "call", "Sys.init", "0";
     }
 
-    // --- Process each .vm file ---
-    for (i = 1; i <= nvm; i++) {
-        processVMFile, vmFiles(i);
+    // --- Sys.vm first ---
+    if (hasSys) {
+        processVMFile, sysPath;
+    }
+
+    // --- Then all others ---
+    for (i = 1; i <= nothers; i++) {
+        processVMFile, otherFiles(i);
     }
 
     close, outFile;
     write, format="Output file is ready: %s\n", asmName;
 }
-
 main;
