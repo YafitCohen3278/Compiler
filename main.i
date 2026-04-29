@@ -51,6 +51,7 @@ func vmParseInt(s)
 //      w1 - command name (e.g. "push", "add", "eq")
 //      w2 - segment name for push/pop (e.g. "static", "local")
 //      w3 - index for push/pop (e.g. "0", "4")
+
 func dispatch(w1, w2, w3)
 {
     extern logicCounter, currentVM, callCounter;
@@ -422,6 +423,8 @@ func dispatch(w1, w2, w3)
         return;
     }
 }
+
+
 
 //  processVMFile(filepath)
 //    Processes a single .vm input file line by line.
